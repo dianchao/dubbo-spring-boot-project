@@ -32,7 +32,13 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * Dubbo {@link Endpoint} Auto-{@link Configuration}
+ * Dubbo Endpoint 自动配置类
  *
+ * 如果使用的是 Spring Boot 2，有一个坑要注意，因为 《Spring Boot 2.0 的 Actuator 只暴露 health 和 info》 ，所以需要手动在
+ * 配置文件中，添加要开启的 Dubbo Endpoint 。
+ *
+ * # application.properties
+ * management.endpoints.web.exposure.include=health,info,dubbo,dubboconfigs
  *
  * @see Endpoint
  * @see Configuration
@@ -41,7 +47,7 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource(
         name = "Dubbo Endpoints Default Properties",
-        value = "classpath:/META-INF/dubbo-endpoins-default.properties")
+        value = "classpath:/META-INF/dubbo-endpoins-default.properties") // 导入该配置文件
 public class DubboEndpointsAutoConfiguration {
 
     @Bean
