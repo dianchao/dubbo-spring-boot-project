@@ -45,7 +45,7 @@ import static org.springframework.util.ClassUtils.isPrimitiveOrWrapper;
 
 /**
  * Abstract Dubbo {@link Endpoint @Endpoint}
- *
+ * 实现 ApplicationContextAware、EnvironmentAware 接口，Dubbo Endpoint 抽象类，提供给子类工具方法。
  *
  * @since 0.2.0
  */
@@ -67,17 +67,24 @@ public abstract class AbstractDubboEndpoint implements ApplicationContextAware, 
         }
     }
 
+    /**
+     * 获取 Bean 的元数据
+     *
+     * @param bean
+     * @return
+     */
     protected Map<String, Object> resolveBeanMetadata(final Object bean) {
-
+        // 创建 Map
         final Map<String, Object> beanMetadata = new LinkedHashMap<>();
 
         try {
-
+            // 获取 BeanInfo 对象
             BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            // 获取 PropertyDescriptor 数组
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-
+            // 遍历 PropertyDescriptor 数组
             for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-
+                // 获取 Method 对象
                 Method readMethod = propertyDescriptor.getReadMethod();
 
                 if (readMethod != null && isSimpleType(propertyDescriptor.getPropertyType())) {
@@ -98,18 +105,39 @@ public abstract class AbstractDubboEndpoint implements ApplicationContextAware, 
 
     }
 
+    /**
+     * 获取所有 ServiceBean
+     *
+     * @return
+     */
     protected Map<String, ServiceBean> getServiceBeansMap() {
         return beansOfTypeIncludingAncestors(applicationContext, ServiceBean.class);
     }
 
+    /**
+     * 获取 ReferenceAnnotationBeanPostProcessor Bean 对象
+     *
+     * @return
+     */
     protected ReferenceAnnotationBeanPostProcessor getReferenceAnnotationBeanPostProcessor() {
         return applicationContext.getBean(BEAN_NAME, ReferenceAnnotationBeanPostProcessor.class);
     }
 
+    /**
+     * 获取所有 ProtocolConfig
+     *
+     * @return
+     */
     protected Map<String, ProtocolConfig> getProtocolConfigsBeanMap() {
         return beansOfTypeIncludingAncestors(applicationContext, ProtocolConfig.class);
     }
 
+    /**
+     * 基本类型 or 包装类型
+     *
+     * @param type
+     * @return
+     */
     private static boolean isSimpleType(Class<?> type) {
         return isPrimitiveOrWrapper(type)
                 || type == String.class
