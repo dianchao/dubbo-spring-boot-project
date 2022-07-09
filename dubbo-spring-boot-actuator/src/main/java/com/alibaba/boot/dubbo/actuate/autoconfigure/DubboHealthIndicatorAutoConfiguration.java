@@ -39,11 +39,11 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.0.0
  */
 @Configuration
-@ConditionalOnClass({HealthIndicator.class})
-@AutoConfigureBefore({EndpointAutoConfiguration.class})
-@AutoConfigureAfter(DubboAutoConfiguration.class)
+@ConditionalOnClass({HealthIndicator.class}) // 存在 HealthIndicator 类的情况下
+@AutoConfigureBefore({EndpointAutoConfiguration.class}) // 在 EndpointAutoConfiguration 自动配置类之前初始化
+@AutoConfigureAfter(DubboAutoConfiguration.class) // 在 DubboAutoConfiguration 自动配置类之后初始化
 @ConditionalOnEnabledHealthIndicator("dubbo")
-@EnableConfigurationProperties(DubboHealthIndicatorProperties.class)
+@EnableConfigurationProperties(DubboHealthIndicatorProperties.class) // 自动配置 DubboHealthIndicatorProperties 类
 public class DubboHealthIndicatorAutoConfiguration {
 
     @Bean
