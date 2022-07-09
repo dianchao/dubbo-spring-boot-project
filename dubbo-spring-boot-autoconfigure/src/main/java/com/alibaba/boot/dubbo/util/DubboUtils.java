@@ -122,9 +122,10 @@ public abstract class DubboUtils {
     public static SortedMap<String, Object> filterDubboProperties(ConfigurableEnvironment environment) {
 
         SortedMap<String, Object> dubboProperties = new TreeMap<>();
-
+        // 获取所有的配置
         Map<String, Object> properties = EnvironmentUtils.extractProperties(environment);
 
+        // 遍历配置，如果以 "dubbo." 开头，则添加到 dubboProperties 中
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             String propertyName = entry.getKey();
 
@@ -134,7 +135,7 @@ public abstract class DubboUtils {
             }
 
         }
-
+        // 返回 dubboProperties
         return Collections.unmodifiableSortedMap(dubboProperties);
 
     }

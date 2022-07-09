@@ -25,6 +25,7 @@ import static com.alibaba.boot.dubbo.util.DubboUtils.filterDubboProperties;
 
 /**
  * Dubbo Properties {@link Endpoint}
+ * 继承 AbstractDubboEndpoint 抽象类，获取 Dubbo Properties
  *
  *
  * @since 1.0.0

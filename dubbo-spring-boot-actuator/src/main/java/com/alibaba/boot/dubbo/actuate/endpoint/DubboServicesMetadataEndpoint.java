@@ -27,7 +27,7 @@ import java.util.Map;
 
 /**
  * Dubbo {@link Service} Metadata {@link Endpoint}
- *
+ * 继承 AbstractDubboEndpoint 抽象类，获取所有的 Dubbo @Service Bean 的元数据
  *
  * @since 0.2.0
  */
@@ -36,26 +36,33 @@ public class DubboServicesMetadataEndpoint extends AbstractDubboEndpoint {
 
     @ReadOperation
     public Map<String, Map<String, Object>> services() {
-
+        // 获取所有的 ServiceBean
         Map<String, ServiceBean> serviceBeansMap = getServiceBeansMap();
 
+        // 创建 Map
+        // KEY：Bean 的名字
+        // VALUE：Bean 的元数据
         Map<String, Map<String, Object>> servicesMetadata = new LinkedHashMap<>(serviceBeansMap.size());
 
+        // 遍历 serviceBeansMap 元素
         for (Map.Entry<String, ServiceBean> entry : serviceBeansMap.entrySet()) {
-
+            // 获取 Bean 的名字
             String serviceBeanName = entry.getKey();
 
+            // 获取 ServiceBean 对象
             ServiceBean serviceBean = entry.getValue();
 
+            // 获取 Bean 的元数据
             Map<String, Object> serviceBeanMetadata = resolveBeanMetadata(serviceBean);
 
+            // 获取 Service 对象。若获取到，则添加到 serviceBeanMetadata 中
             Object service = resolveServiceBean(serviceBeanName, serviceBean);
 
             if (service != null) {
                 // Add Service implementation class
                 serviceBeanMetadata.put("serviceClass", service.getClass().getName());
             }
-
+            // 添加到 servicesMetadata 中
             servicesMetadata.put(serviceBeanName, serviceBeanMetadata);
 
         }

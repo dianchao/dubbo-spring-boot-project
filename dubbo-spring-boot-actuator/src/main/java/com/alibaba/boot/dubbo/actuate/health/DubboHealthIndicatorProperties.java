@@ -34,7 +34,7 @@ import static com.alibaba.boot.dubbo.actuate.health.DubboHealthIndicatorProperti
  * @see HealthIndicator
  * @since 1.0.0
  */
-@ConfigurationProperties(prefix = PREFIX, ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = PREFIX, ignoreUnknownFields = false) // "management.health.dubbo" 开头的配置
 public class DubboHealthIndicatorProperties {
 
     /**
@@ -76,7 +76,8 @@ public class DubboHealthIndicatorProperties {
         private Set<String> defaults = new LinkedHashSet<>(Arrays.asList("memory", "load"));
 
         /**
-         * The extra names of {@link StatusChecker}
+         * 配置的 "management.health.dubbo.extras" 集合
+         * 每个元素，是 StatusChecker 的实现类
          */
         private Set<String> extras = new LinkedHashSet<>();
 

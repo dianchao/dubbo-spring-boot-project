@@ -31,6 +31,7 @@ import static com.alibaba.dubbo.registry.support.AbstractRegistryFactory.getRegi
 
 /**
  * Dubbo Shutdown
+ * 继承 AbstractDubboEndpoint 抽象类，关闭 Dubbo
  *
  * @since 0.2.0
  */
@@ -40,35 +41,38 @@ public class DubboShutdownEndpoint extends AbstractDubboEndpoint {
 
     @WriteOperation
     public Map<String, Object> shutdown() throws Exception {
-
+        // 创建 Map
         Map<String, Object> shutdownCountData = new LinkedHashMap<>();
 
-        // registries
+        // 获取注册中心的数量
         int registriesCount = getRegistries().size();
 
-        // protocols
+        // 销毁 ProtocolConfig
         int protocolsCount = getProtocolConfigsBeanMap().size();
 
         ProtocolConfig.destroyAll();
+        // 添加到 shutdownCountData 中
         shutdownCountData.put("registries", registriesCount);
         shutdownCountData.put("protocols", protocolsCount);
 
-        // Service Beans
+        // 获取所有 ServiceBean ，然后逐个销毁
         Map<String, ServiceBean> serviceBeansMap = getServiceBeansMap();
         if (!serviceBeansMap.isEmpty()) {
             for (ServiceBean serviceBean : serviceBeansMap.values()) {
                 serviceBean.destroy();
             }
         }
+        // 添加到 shutdownCountData 中
         shutdownCountData.put("services", serviceBeansMap.size());
 
-        // Reference Beans
+        // 获取 ReferenceAnnotationBeanPostProcessor 对象
         ReferenceAnnotationBeanPostProcessor beanPostProcessor = getReferenceAnnotationBeanPostProcessor();
 
+        // 获取 Reference Bean 的数量
         int referencesCount = beanPostProcessor.getReferenceBeans().size();
-
+        // 销毁所有 Reference Bean
         beanPostProcessor.destroy();
-
+        // 添加到 shutdownCountData 中
         shutdownCountData.put("references", referencesCount);
 
         // Set Result to complete

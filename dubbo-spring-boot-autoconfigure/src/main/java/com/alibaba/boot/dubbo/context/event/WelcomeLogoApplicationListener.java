@@ -33,30 +33,32 @@ import static com.alibaba.boot.dubbo.util.DubboUtils.DUBBO_SPRING_BOOT_GITHUB_UR
 import static com.alibaba.boot.dubbo.util.DubboUtils.LINE_SEPARATOR;
 
 /**
- * Dubbo Welcome Logo {@link ApplicationListener}
+ * 实现 ApplicationListener 接口，处理 ApplicationEnvironmentPreparedEvent 事件，从而打印 Dubbo Banner 文本
  *
  * @see ApplicationListener
  * @since 1.0.0
  */
 @Order(LoggingApplicationListener.DEFAULT_ORDER + 1)
 public class WelcomeLogoApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
-
+    /**
+     * 是否执行过
+     *
+     * 通过该变量，保证有且仅处理一次 ApplicationEnvironmentPreparedEvent 事件
+     */
     private static AtomicBoolean processed = new AtomicBoolean(false);
 
     @Override
     public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 
-        // Skip if processed before, prevent duplicated execution in Hierarchical ApplicationContext
+        // 如果已经处理，则直接跳过
         if (processed.get()) {
             return;
         }
 
-        /**
-         * Gets Logger After LoggingSystem configuration ready
-         * @see LoggingApplicationListener
-         */
+        // 获取 Logger 对象
         final Logger logger = LoggerFactory.getLogger(getClass());
 
+        // 获取 Dubbo Banner 文本
         String bannerText = buildBannerText();
 
         if (logger.isInfoEnabled()) {
@@ -65,7 +67,7 @@ public class WelcomeLogoApplicationListener implements ApplicationListener<Appli
             System.out.print(bannerText);
         }
 
-        // mark processed to be true
+        // 标记已执行
         processed.compareAndSet(false, true);
     }
 

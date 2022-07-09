@@ -38,6 +38,8 @@ import static com.alibaba.boot.dubbo.util.DubboUtils.filterDubboProperties;
  * {@link ConfigUtils#getProperties() Dubbo Config}.
  * {@link AbstractConfig Dubbo Config} on {@link ApplicationEnvironmentPreparedEvent}.
  * <p>
+ * 实现 ApplicationListener 接口，也是处理 ApplicationEnvironmentPreparedEvent 事件，根据 "dubbo.config.override" 的属性值，
+ * 若为 true 时，则获取 environment 中 "dubbo." 开头的配置，覆盖添加到 Dubbo Properties 对象中。
  *
  * @see ConfigUtils
  * @since 1.0.0
@@ -54,15 +56,17 @@ public class OverrideDubboConfigApplicationListener implements ApplicationListen
          */
         final Logger logger = LoggerFactory.getLogger(getClass());
 
+        // <1> 获取 "dubbo.config.override" 属性对应的值。默认情况下为 true
         ConfigurableEnvironment environment = event.getEnvironment();
 
         boolean override = environment.getProperty(OVERRIDE_CONFIG_PROPERTY_NAME, boolean.class,
                 DEFAULT_OVERRIDE_CONFIG_PROPERTY_VALUE);
 
+        // <2> 如果要重写，则覆盖添加到 Dubbo Properties 中
         if (override) {
-
+            // <2.1> 从 environment 中，提取 "dubbo." 开头的配置
             SortedMap<String, Object> dubboProperties = filterDubboProperties(environment);
-
+            // <2.2> 添加到 Dubbo Properties 中
             ConfigUtils.getProperties().putAll(dubboProperties);
 
             if (logger.isInfoEnabled()) {

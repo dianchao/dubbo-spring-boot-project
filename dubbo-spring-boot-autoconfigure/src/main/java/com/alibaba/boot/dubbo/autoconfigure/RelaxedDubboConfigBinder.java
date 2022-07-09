@@ -33,6 +33,9 @@ import org.springframework.core.env.PropertySource;
 import static org.springframework.boot.context.properties.source.ConfigurationPropertySources.from;
 
 /**
+ * RelaxedDubboConfigBinder ，继承 AbstractDubboConfigBinder 抽象类，负责将 Spring Boot 的配置属性，
+ * 注入到 Dubbo AbstractConfig 配置对象中
+ *
  * Spring Boot Relaxed {@link DubboConfigBinder} implementation
  * see org.springframework.boot.context.properties.ConfigurationPropertiesBinder
  *
@@ -42,30 +45,46 @@ public class RelaxedDubboConfigBinder extends AbstractDubboConfigBinder {
 
     @Override
     public <C extends AbstractConfig> void bind(String prefix, C dubboConfig) {
-
+        // <1.1> 获取 PropertySource 数组
         Iterable<PropertySource<?>> propertySources = getPropertySources();
 
-        // Converts ConfigurationPropertySources
+        // <1.2> 转换成 ConfigurationPropertySource 数组
         Iterable<ConfigurationPropertySource> configurationPropertySources = from(propertySources);
 
-        // Wrap Bindable from DubboConfig instance
+        // <2> 将 dubboConfig 包装成 Bindable 对象
         Bindable<C> bindable = Bindable.ofInstance(dubboConfig);
 
+        // <3.1> 创建 Binder 对象
         Binder binder = new Binder(configurationPropertySources, new PropertySourcesPlaceholdersResolver(propertySources));
 
+        // <3.2> 获取 BindHandler 对象
         // Get BindHandler
         BindHandler bindHandler = getBindHandler();
 
+        // <3.3> 执行绑定，会将 propertySources 属性，注入到 dubboConfig 对象中
+        // 将配置中，指定前缀（prefix）的属性，注入到 AbstractConfig 配置对象中
         // Bind
         binder.bind(prefix, bindable, bindHandler);
 
     }
 
+    /**
+     * 有时候，绑定时可能需要实现额外的逻辑，而BindHandler接口提供了一个很好的方法来实现这一点。 每个BindHandler都可以实现onStart，onSuccess，onFailure和onFinish方法来覆盖行为。
+     *
+     * Spring Boot提供了一些处理程序，主要用于支持现有的@ConfigurationProperties绑定。 例如，ValidationBindHandler可用于对绑定对象应用Validator验证。
+     *
+     * @return
+     */
     private BindHandler getBindHandler() {
+        // 获取默认的 BindHandler 处理器
         BindHandler handler = BindHandler.DEFAULT;
+
+        // 进一步包装成 IgnoreErrorsBindHandler 对象
         if (isIgnoreInvalidFields()) {
             handler = new IgnoreErrorsBindHandler(handler);
         }
+
+        // 进一步包装成 NoUnboundElementsBindHandler 对象
         if (!isIgnoreUnknownFields()) {
             UnboundElementsSourceFilter filter = new UnboundElementsSourceFilter();
             handler = new NoUnboundElementsBindHandler(handler, filter);

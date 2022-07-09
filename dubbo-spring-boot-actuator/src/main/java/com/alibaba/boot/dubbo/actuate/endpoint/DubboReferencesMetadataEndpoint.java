@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * Dubbo {@link Reference} Metadata {@link Endpoint}
- *
+ * 继承 AbstractDubboEndpoint 抽象类，获取所有的 Dubbo @Reference Bean 的元数据
  *
  * @since 1.0.0
  */
@@ -38,12 +38,18 @@ public class DubboReferencesMetadataEndpoint extends AbstractDubboEndpoint {
 
     @ReadOperation
     public Map<String, Map<String, Object>> references() {
-
+        // 创建 Map
+        // KEY：Bean 的名字
+        // VALUE：Bean 的元数据
         Map<String, Map<String, Object>> referencesMetadata = new LinkedHashMap<>();
 
+        // 获取 ReferenceAnnotationBeanPostProcessor Bean 对象
         ReferenceAnnotationBeanPostProcessor beanPostProcessor = getReferenceAnnotationBeanPostProcessor();
 
+        // injected Field ReferenceBean Cache
         referencesMetadata.putAll(buildReferencesMetadata(beanPostProcessor.getInjectedFieldReferenceBeanMap()));
+
+        // injected Method ReferenceBean Cache
         referencesMetadata.putAll(buildReferencesMetadata(beanPostProcessor.getInjectedMethodReferenceBeanMap()));
 
         return referencesMetadata;
@@ -52,18 +58,24 @@ public class DubboReferencesMetadataEndpoint extends AbstractDubboEndpoint {
 
     private Map<String, Map<String, Object>> buildReferencesMetadata(
             Map<InjectionMetadata.InjectedElement, ReferenceBean<?>> injectedElementReferenceBeanMap) {
+        // 创建 Map
+        // KEY：Bean 的名字
+        // VALUE：Bean 的元数据
         Map<String, Map<String, Object>> referencesMetadata = new LinkedHashMap<>();
 
+        // 遍历 injectedElementReferenceBeanMap 元素
         for (Map.Entry<InjectionMetadata.InjectedElement, ReferenceBean<?>> entry :
                 injectedElementReferenceBeanMap.entrySet()) {
 
             InjectionMetadata.InjectedElement injectedElement = entry.getKey();
-
+            // 获取 ReferenceBean 对象
             ReferenceBean<?> referenceBean = entry.getValue();
-
+            // 获取 Bean 元数据
             Map<String, Object> beanMetadata = resolveBeanMetadata(referenceBean);
+            // 获取 invoker 属性
             beanMetadata.put("invoker", resolveBeanMetadata(referenceBean.get()));
 
+            // 添加到 referencesMetadata 中
             referencesMetadata.put(String.valueOf(injectedElement.getMember()), beanMetadata);
 
         }

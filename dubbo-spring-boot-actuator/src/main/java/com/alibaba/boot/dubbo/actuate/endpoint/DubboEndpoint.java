@@ -33,6 +33,7 @@ import static com.alibaba.boot.dubbo.util.DubboUtils.DUBBO_SPRING_BOOT_ISSUES_UR
 
 /**
  * Actuator {@link Endpoint} to expose Dubbo Meta Data
+ * Dubbo Endpoint ，获取 Dubbo Meta Data（元数据）。
  *
  *
  * @see Endpoint
@@ -43,15 +44,18 @@ public class DubboEndpoint {
 
     @ReadOperation
     public Map<String, Object> invoke() {
-
+        // 创建 Map
         Map<String, Object> metaData = new LinkedHashMap<>();
 
+        // timestamp
         metaData.put("timestamp", System.currentTimeMillis());
 
+        // versions
         Map<String, String> versions = new LinkedHashMap<>();
         versions.put("dubbo-spring-boot", Version.getVersion(DubboUtils.class, "1.0.0"));
         versions.put("dubbo", Version.getVersion());
 
+        // urls
         Map<String, String> urls = new LinkedHashMap<>();
         urls.put("dubbo", DUBBO_GITHUB_URL);
         urls.put("mailing-list", DUBBO_MAILING_LIST);

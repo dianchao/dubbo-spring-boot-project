@@ -57,23 +57,24 @@ public abstract class EnvironmentUtils {
 //    }
 
     private static Map<String, Object> doExtraProperties(ConfigurableEnvironment environment) {
-
+        // 注意，是顺序的 HashMap
         Map<String, Object> properties = new LinkedHashMap<>(); // orderly
 
+        // 获取所有 PropertySource 的 Map
         Map<String, PropertySource<?>> map = doGetPropertySources(environment);
 
         for (PropertySource<?> source : map.values()) {
-
+            // 如果是 EnumerablePropertySource 类型
             if (source instanceof EnumerablePropertySource) {
 
                 EnumerablePropertySource propertySource = (EnumerablePropertySource) source;
-
+                // 忽略无属性值
                 String[] propertyNames = propertySource.getPropertyNames();
 
                 if (ObjectUtils.isEmpty(propertyNames)) {
                     continue;
                 }
-
+                // 遍历 propertyNames 数组，添加对应属性到 properties 中
                 for (String propertyName : propertyNames) {
 
                     if (!properties.containsKey(propertyName)) { // put If absent
@@ -93,6 +94,7 @@ public abstract class EnvironmentUtils {
     private static Map<String, PropertySource<?>> doGetPropertySources(ConfigurableEnvironment environment) {
         Map<String, PropertySource<?>> map = new LinkedHashMap<String, PropertySource<?>>();
         MutablePropertySources sources = environment.getPropertySources();
+        // 遍历 MutablePropertySource 数组，转换成 Map 集合
         for (PropertySource<?> source : sources) {
             extract("", map, source);
         }

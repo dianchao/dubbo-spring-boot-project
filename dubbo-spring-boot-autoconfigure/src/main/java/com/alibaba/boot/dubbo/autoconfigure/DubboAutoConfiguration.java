@@ -56,9 +56,9 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
  * @see EnableDubbo
  * @since 1.0.0
  */
-@Configuration
-@ConditionalOnProperty(prefix = DUBBO_PREFIX, name = "enabled", matchIfMissing = true, havingValue = "true")
-@ConditionalOnClass(AbstractConfig.class)
+@Configuration // 配置类
+@ConditionalOnProperty(prefix = DUBBO_PREFIX, name = "enabled", matchIfMissing = true, havingValue = "true") // 要求配置了 "dubbo.enabled=true" 或者，"dubbo.enabled" 未配置
+@ConditionalOnClass(AbstractConfig.class) // AbstractConfig 类存在的时候，即用于判断有 Dubbo 库
 public class DubboAutoConfiguration {
 
     /**
@@ -67,18 +67,23 @@ public class DubboAutoConfiguration {
      * @param environment {@link Environment} Bean
      * @return {@link ServiceAnnotationBeanPostProcessor}
      */
-    @ConditionalOnProperty(name = BASE_PACKAGES_PROPERTY_NAME)
-    @ConditionalOnClass(ConfigurationPropertySources.class)
+    @ConditionalOnProperty(name = BASE_PACKAGES_PROPERTY_NAME) // 配置了 "dubbo.scan.base-package" 属性，即要扫描 Dubbo 注解的包
+    @ConditionalOnClass(ConfigurationPropertySources.class) // 有 Spring Boot 配置加载的功能
     @Bean
     public ServiceAnnotationBeanPostProcessor serviceAnnotationBeanPostProcessor(Environment environment) {
+        // <1> 获取 "dubbo.scan.base-package" 属性，即要扫描 Dubbo 注解的包。
         Set<String> packagesToScan = environment.getProperty(BASE_PACKAGES_PROPERTY_NAME, Set.class, emptySet());
+
+        // <2> 创建 ServiceAnnotationBeanPostProcessor 对象，后续，ServiceAnnotationBeanPostProcessor 会扫描 packagesToScan 包的 Dubbo @Service 注解，
+        // 创建对应的 Dubbo Service Bean 对象
         return new ServiceAnnotationBeanPostProcessor(packagesToScan);
     }
 
-    @ConditionalOnClass(Binder.class)
+    @ConditionalOnClass(Binder.class) // 存在 Binder 类的时候
     @Bean
-    @Scope(scopeName = SCOPE_PROTOTYPE)
+    @Scope(scopeName = SCOPE_PROTOTYPE) // 多例, 为什么？因为有多个 AbstractConfig 对象
     public RelaxedDubboConfigBinder relaxedDubboConfigBinder() {
+        // RelaxedDubboConfigBinder ，用于将具体的属性，设置到相应的 AbstractConfig 对象中。
         return new RelaxedDubboConfigBinder();
     }
 
@@ -87,13 +92,27 @@ public class DubboAutoConfiguration {
      *
      * @return {@link ReferenceAnnotationBeanPostProcessor}
      */
-    @ConditionalOnMissingBean
-    @Bean(name = ReferenceAnnotationBeanPostProcessor.BEAN_NAME)
+    @ConditionalOnMissingBean  // 不存在 ReferenceAnnotationBeanPostProcessor Bean 的时候
+    @Bean(name = ReferenceAnnotationBeanPostProcessor.BEAN_NAME) // Bean 的名字是 referenceAnnotationBeanPostProcessor
     public ReferenceAnnotationBeanPostProcessor referenceAnnotationBeanPostProcessor() {
+        // 创建 Bean 名字为 "referenceAnnotationBeanPostProcessor" 的 ReferenceAnnotationBeanPostProcessor Bean 对象
+        // 后续，ReferenceAnnotationBeanPostProcessor 会扫描 Dubbo @Reference 注解，创建对应的 Dubbo Service Bean 对象。
         return new ReferenceAnnotationBeanPostProcessor();
     }
 
     /**
+     * SingleDubboConfigConfiguration 对应 @EnableDubboConfig(multiple = false) 。
+     * 无任何条件，所以会创建。
+     * 引入了单个 Dubbo 配置绑定 Bean 的配置
+     *
+     * dubbo.application
+     * dubbo.module
+     * dubbo.registry
+     * dubbo.protocol
+     * dubbo.monitor
+     * dubbo.provider
+     * dubbo.consumer
+     *
      * Single Dubbo Config Configuration
      *
      * @see EnableDubboConfig
@@ -104,6 +123,18 @@ public class DubboAutoConfiguration {
     }
 
     /**
+     * MultipleDubboConfigConfiguration 对应 @EnableDubboConfig(multiple = true)
+     * 要求配置 "dubbo.config.multiple=true" 。默认情况下，Dubbo 自带 "dubbo.config.multiple=true" ，所以也会创建。
+     * 引入了多个 Dubbo 配置绑定 Bean 的配置。
+     *
+     * dubbo.applications
+     * dubbo.modules
+     * dubbo.registries
+     * dubbo.protocols
+     * dubbo.monitors
+     * dubbo.providers
+     * dubbo.consumers
+     *
      * Multiple Dubbo Config Configuration , equals @EnableDubboConfig.multiple() == <code>true</code>
      *
      * @see EnableDubboConfig
